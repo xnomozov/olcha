@@ -26,6 +26,9 @@ class Category(models.Model):
 
         super(Category, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return self.title
+
 
 class Group(TimestampedModel):
     name = models.CharField(max_length=300, unique=True)
@@ -38,6 +41,9 @@ class Group(TimestampedModel):
             self.slug = slugify(self.name)
 
         super(Group, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
 
 
 class Product(TimestampedModel):

@@ -3,8 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, status
-from app.models import Category
-from app.serializers import CategorySerializer
+from app.models import Category, Product
+from app.serializers import CategorySerializer, ProductSerializer
 
 
 class CategoryListView(generics.ListAPIView):
@@ -67,6 +67,7 @@ class UpdateCategoryView(generics.UpdateAPIView):
 class DeleteCategoryView(generics.DestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    lookup_field = 'slug'
 
     def get(self, request, *args, **kwargs):
         slug = self.kwargs['slug']
@@ -74,8 +75,21 @@ class DeleteCategoryView(generics.DestroyAPIView):
         serializer = CategorySerializer(category)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    #
     def delete(self, request, *args, **kwargs):
         slug = self.kwargs['slug']
         category = get_object_or_404(Category, slug=slug)
         category.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ProductListView(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+
+class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    lookup_field = 'slug'
+
