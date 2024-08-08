@@ -16,7 +16,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_avg_rating(self, obj):
         avg_rating = obj.comments.aggregate(avg=Avg('rating'))['avg']
-        return avg_rating if avg_rating is not None else 0
+        return round(avg_rating, 1) if avg_rating is not None else 0
 
     def get_image(self, obj):
         request = self.context.get('request')
