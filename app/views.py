@@ -1,10 +1,12 @@
 # Create your views here.
+from urllib import request
+
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, status
-from app.models import Category, Product
-from app.serializers import CategorySerializer, ProductSerializer
+from app.models import Category, Product, Group
+from app.serializers import CategorySerializer, ProductSerializer, GroupSerializer
 
 
 class CategoryListView(generics.ListAPIView):
@@ -83,13 +85,39 @@ class DeleteCategoryView(generics.DestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+# class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#     lookup_field = 'slug'
+
+
+class GroupListView(generics.ListAPIView):
+    serializer_class = GroupSerializer
+    lookup_field = 'slug'
+
+    def get_queryset(self):
+        category_slug = self.kwargs.get('slug')
+        if category_slug:
+            return Group.objects.filter(category__slug=category_slug)
+        return Group.objects.all()
+
+
 class ProductListView(generics.ListCreateAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-
-
-class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'slug'
 
+    def get_queryset(self):
+        category_slug = self.kwargs.get('category_slug')
+        group_slug = self.kwargs.get('group_slug')
+
+        queryset = Product.objects.all()
+
+        if category_slug and group_slug:
+            queryset = queryset.filter(group__category__slug=category_slug, group__slug=group_slug)
+        elif category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
+        elif group_slug:
+            queryset = queryset.filter(group__slug=group_slug)
+
+        return queryset

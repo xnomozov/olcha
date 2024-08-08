@@ -3,7 +3,6 @@ from django.utils.text import slugify
 from django.contrib.auth.models import User
 
 
-
 # Create your models here.
 
 
@@ -33,7 +32,7 @@ class Category(models.Model):
 class Group(TimestampedModel):
     name = models.CharField(max_length=300, unique=True)
     slug = models.SlugField(max_length=300, unique=True, editable=False, blank=True, null=False)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='groups')
     image = models.ImageField(upload_to='images/')
 
     def save(self, *args, **kwargs):
@@ -90,10 +89,13 @@ class Product(TimestampedModel):
 
         return attributes_dict
 
+    def __str__(self):
+        return self.name
+
 
 class Image(models.Model):
     image = models.ImageField(upload_to='images/')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     is_primary = models.BooleanField(default=False)
 
 
@@ -107,10 +109,17 @@ class Comment(TimestampedModel):
         five = 5
 
     rating = models.IntegerField(choices=Rating.choices, default=Rating.zero.value)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField()
 
+    def save(self, *args, **kwargs):
+        if not self.user:
+            request = kwargs.get('request')
+            user = request.user
+            self.user = user
+
+        super(Comment, self).save(*args, **kwargs)
 
 class AttributeKey(models.Model):
     key = models.CharField(max_length=200, unique=True)
