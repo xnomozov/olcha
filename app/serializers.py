@@ -1,6 +1,6 @@
 from django.db.models import Avg
 from rest_framework import serializers
-from .models import Category, Comment, Product, Group
+from .models import Category, Comment, Product, Group, ProductAttribute
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -55,3 +55,19 @@ class CommentSerializer(serializers.ModelSerializer):
         if request and request.user:
             validated_data['user'] = request.user
         return super().create(validated_data)
+
+
+class ProductAttributeSerializer(serializers.ModelSerializer):
+    class AttributeSerializer(serializers.ModelSerializer):
+        attributes = serializers.SerializerMethodField()
+
+        def get_attributes(self, products):
+            attributes = ProductAttribute.objects.filter(product=products.id)
+            attributes_dict = {}
+            for attribute in attributes:
+                attributes_dict[attribute.key.name] = attribute.value.name
+            return attributes_dict
+
+        class Meta:
+            model = Product
+            fields = ['id', 'name', 'slug', 'attributes']
