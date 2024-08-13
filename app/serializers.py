@@ -1,5 +1,8 @@
+from django.contrib.auth.models import User
 from django.db.models import Avg
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 from .models import Category, Comment, Product, Group, ProductAttribute
 
 
@@ -71,3 +74,47 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
         class Meta:
             model = Product
             fields = ['id', 'name', 'slug', 'attributes']
+
+
+class UserLoginSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(read_only=True)
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "password"]
+
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    username = serializers.CharField()
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+    password2 = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "email", "password", "password2"]
+
+    def validate_username(self, username):
+        if User.objects.filter(username=username).exists():
+            raise ValidationError({"detail": "User already exists!"})
+        return username
+
+    def validate(self, data):
+        if data['password'] != data['password2']:
+            raise ValidationError({"message": "Both passwords must match!"})
+
+        if User.objects.filter(email=data['email']).exists():
+            raise ValidationError({"message": "Email already taken!"})
+
+        return data
+
+    def create(self, validated_data):
+        # Remove password2 as it is not needed for user creation
+        validated_data.pop('password2')
+
+        # Create the user
+        user = User.objects.create_user(**validated_data)
+        return user

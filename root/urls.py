@@ -20,9 +20,11 @@ from django.conf.urls.static import static
 from django.urls import path, include
 
 from root import settings
+from root import token_vieww
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
-    path('olcha-uz/', include('app.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+                  path('admin/', admin.site.urls),
+                  path('api-auth/', include('rest_framework.urls')),
+                  path('olcha-uz/', include('app.urls')),
+                  path('api-token-auth/', token_vieww.CustomAuthToken.as_view()),
+              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

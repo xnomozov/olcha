@@ -1,4 +1,5 @@
-from . import views
+from app.views.app import views
+from app.views.auth import views as auth_views
 from django.urls import path
 
 urlpatterns = [
@@ -13,4 +14,9 @@ urlpatterns = [
 
     # group
     path('category/<slug:slug>/groups/', views.GroupListView.as_view(), name='group-list'),
+
+    # auth
+    path("login/", auth_views.UserLoginAPIView.as_view(), name="user_login"),
+    path("register/", auth_views.UserRegisterAPIView().as_view(), name="user_register"),
+    path("logout/", auth_views.UserLogoutAPIView.as_view(), name="user_logout")
 ]
