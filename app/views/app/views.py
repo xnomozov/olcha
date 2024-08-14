@@ -1,6 +1,6 @@
 # Create your views here.
 from urllib import request
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.shortcuts import get_object_or_404
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -109,7 +109,7 @@ class ProductListView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
     lookup_field = 'slug'
     permission_classes = [IsAuthenticatedOrReadOnly]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
         category_slug = self.kwargs.get('category_slug')
