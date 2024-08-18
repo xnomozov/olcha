@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 from app.models import Category, Product, Group
 from app.serializers import CategorySerializer, ProductSerializer, GroupSerializer, ProductAttributeSerializer
+from app import permissions
 
 
 class CategoryListView(generics.ListAPIView):
@@ -19,6 +20,7 @@ class CategoryListView(generics.ListAPIView):
 class CategoryDetail(generics.RetrieveAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (permissions.IsSuperAdminOrReadOnly,)
 
     def retrieve(self, request, *args, **kwargs):
         slug = self.kwargs['slug']
@@ -46,11 +48,13 @@ class CategoryDetail(generics.RetrieveAPIView):
 class CreateCategoryView(generics.CreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (permissions.IsSuperAdminOrReadOnly,)
 
 
 class UpdateCategoryView(generics.UpdateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (permissions.IsSuperAdminOrReadOnly,)
 
     def get(self, request, *args, **kwargs):
         slug = self.kwargs['slug']
@@ -71,6 +75,7 @@ class UpdateCategoryView(generics.UpdateAPIView):
 class DeleteCategoryView(generics.DestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (permissions.IsSuperAdminOrReadOnly,)
     lookup_field = 'slug'
 
     def get(self, request, *args, **kwargs):
@@ -108,7 +113,7 @@ class ProductListView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'slug'
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsOwnerIsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
@@ -131,4 +136,3 @@ class ProductAttributeView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductAttributeSerializer
     lookup_field = 'slug'
-
