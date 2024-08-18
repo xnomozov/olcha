@@ -4,10 +4,10 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 
-@receiver(post_save, sender=User)
-def save_profile(sender, instance, created, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
+# @receiver(post_save, sender=User)
+# def save_profile(sender, instance, created, **kwargs):
+#     if created:
+#         Token.objects.create(user=instance)
 
 
 

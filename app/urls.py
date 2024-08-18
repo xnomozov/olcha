@@ -1,6 +1,7 @@
 from app.views.app import views
 from app.views.auth import views as auth_views
 from django.urls import path
+from root import token_vieww
 
 urlpatterns = [
     path('categories/', views.CategoryListView.as_view(), name='category-list'),
@@ -16,7 +17,7 @@ urlpatterns = [
     path('category/<slug:slug>/groups/', views.GroupListView.as_view(), name='group-list'),
 
     # auth
-    path("login/", auth_views.UserLoginAPIView.as_view(), name="user_login"),
-    path("register/", auth_views.UserRegisterAPIView().as_view(), name="user_register"),
-    path("logout/", auth_views.UserLogoutAPIView.as_view(), name="user_logout")
+    path("login/", token_vieww.LoginView.as_view(), name="user_login"),
+    path("register/", token_vieww.RegisterView.as_view(), name="user_register"),
+    path("logout/", token_vieww.LogoutView.as_view(), name="user_logout")
 ]

@@ -25,6 +25,7 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenBlacklistView
 from root import settings
 from root import token_vieww
+from root.token_vieww import LogoutView
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -33,5 +34,5 @@ urlpatterns = [
                   path('api-token-auth/', token_vieww.CustomAuthToken.as_view()),
                   path('api/token/', token_vieww.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
                   path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-                  path('api/token/blacklist/', TokenBlacklistView.as_view(), name='token_blacklist'),
+                  path('login/', LogoutView.as_view(), name='token_blacklist'),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -54,10 +54,8 @@ class UserRegisterAPIView(generics.CreateAPIView):
     serializer_class = UserRegisterSerializer
 
     def perform_create(self, serializer):
-        # Save the user instance
-        user = serializer.save()
 
-        # Create a token for the user
+        user = serializer.save()
         token = Token.objects.get(user=user)
 
         # Add token to the response data
