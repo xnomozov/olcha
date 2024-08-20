@@ -38,7 +38,11 @@ class Group(TimestampedModel):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
-
+            original_slug = self.slug
+            counter = 1
+            while Group.objects.filter(slug=self.slug).exists():
+                self.slug = f'{original_slug}-{counter}'
+                counter += 1
         super(Group, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -136,6 +140,6 @@ class AttributeValue(models.Model):
 
 
 class ProductAttribute(models.Model):
-    product = models.ForeignKey('app.Product', on_delete=models.CASCADE)
+    product = models.ForeignKey('app.Product', on_delete=models.CASCADE, related_name='attributes')
     key = models.ForeignKey('app.AttributeKey', on_delete=models.CASCADE)
     value = models.ForeignKey('app.AttributeValue', on_delete=models.CASCADE)

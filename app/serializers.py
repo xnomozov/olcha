@@ -23,18 +23,15 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         request = self.context.get('request')
-        try:
-            image = obj.images.get(is_primary=True)
-
+        image = obj.images.filter(is_primary=True).first()
+        if image:
             return request.build_absolute_uri(image.image.url)
-        except obj.images.model.DoesNotExist:
-            return None
+        return None
 
     def get_is_liked(self, obj):
         request = self.context.get('request')
         if request.user.is_authenticated:
-            users = obj.user_like.all()
-            return users.filter(id=request.user.id).exists()
+            return obj.filter(id=request.user.id).exists()
         return False
 
     class Meta:
@@ -61,19 +58,17 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class ProductAttributeSerializer(serializers.ModelSerializer):
-    class AttributeSerializer(serializers.ModelSerializer):
-        attributes = serializers.SerializerMethodField()
+    attributes = serializers.SerializerMethodField()
 
-        def get_attributes(self, products):
-            attributes = ProductAttribute.objects.filter(product=products.id)
-            attributes_dict = {}
-            for attribute in attributes:
-                attributes_dict[attribute.key.name] = attribute.value.name
-            return attributes_dict
+    def get_attributes(self, obj):
+        attributes_dict = {}
+        for attr in obj.attributes.all():
+            attributes_dict[attr['attribute_key']] = attr['attribute_value']
+        return attributes_dict
 
-        class Meta:
-            model = Product
-            fields = ['id', 'name', 'slug', 'attributes']
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'slug', 'attributes']
 
 
 class UserLoginSerializer(serializers.ModelSerializer):

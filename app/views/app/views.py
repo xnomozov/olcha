@@ -1,5 +1,8 @@
 # Create your views here.
 from urllib import request
+
+from django.db.models import Prefetch
+from rest_framework.exceptions import NotFound
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.shortcuts import get_object_or_404
 from rest_framework.authentication import TokenAuthentication
@@ -7,10 +10,10 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, status
-from app.models import Category, Product, Group
+from app.models import Category, Product, Group, Image
 from app.serializers import CategorySerializer, ProductSerializer, GroupSerializer, ProductAttributeSerializer
 from app import permissions
-
+Prefetch
 
 class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()
@@ -98,19 +101,23 @@ class DeleteCategoryView(generics.DestroyAPIView):
 #     lookup_field = 'slug'
 
 
-class GroupListView(generics.ListAPIView):
+class GroupListView(generics.ListCreateAPIView):
+    queryset = Group.objects.select_related('category')
     serializer_class = GroupSerializer
     lookup_field = 'slug'
 
-    def get_queryset(self):
-        category_slug = self.kwargs.get('slug')
-        if category_slug:
-            return Group.objects.filter(category__slug=category_slug)
-        return Group.objects.all()
+    def get_object(self):
+        obj = get_object_or_404(Group, slug=self.kwargs['slug'])
+        if not obj:
+            raise NotFound("Group not found")
+        return obj
+
+
+
 
 
 class ProductListView(generics.ListCreateAPIView):
-    queryset = Product.objects.all()
+
     serializer_class = ProductSerializer
     lookup_field = 'slug'
     permission_classes = [permissions.IsOwnerIsAuthenticated]
@@ -120,7 +127,7 @@ class ProductListView(generics.ListCreateAPIView):
         category_slug = self.kwargs.get('category_slug')
         group_slug = self.kwargs.get('group_slug')
 
-        queryset = Product.objects.all()
+        queryset = Product.objects.select_related('group__category')
 
         if category_slug and group_slug:
             queryset = queryset.filter(group__category__slug=category_slug, group__slug=group_slug)
@@ -133,6 +140,7 @@ class ProductListView(generics.ListCreateAPIView):
 
 
 class ProductAttributeView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related('group').prefetch_related('attributes__key', 'attributes__value')
+
     serializer_class = ProductAttributeSerializer
     lookup_field = 'slug'

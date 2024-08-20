@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from debug_toolbar.toolbar import debug_toolbar_urls
 from django.contrib import admin
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import (
@@ -36,3 +37,4 @@ urlpatterns = [
                   path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
                   path('login/', LogoutView.as_view(), name='token_blacklist'),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += debug_toolbar_urls()
