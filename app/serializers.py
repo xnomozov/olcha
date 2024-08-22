@@ -18,25 +18,28 @@ class ProductSerializer(serializers.ModelSerializer):
     is_liked = serializers.SerializerMethodField()
 
     def get_avg_rating(self, obj):
-        avg_rating = obj.comments.aggregate(avg=Avg('rating'))['avg']
+        # Use the precomputed average rating from the annotated field
+        avg_rating = getattr(obj, 'avg_rating', 0)
         return round(avg_rating, 1) if avg_rating is not None else 0
 
     def get_image(self, obj):
+        # Since images are prefetched, this avoids an additional query
         request = self.context.get('request')
-        image = obj.images.filter(is_primary=True).first()
+        image = next((img for img in obj.images.all() if img.is_primary), None)
         if image:
             return request.build_absolute_uri(image.image.url)
         return None
 
     def get_is_liked(self, obj):
-        request = self.context.get('request')
-        if request.user.is_authenticated:
-            return obj.filter(id=request.user.id).exists()
+        user = self.context.get('request').user
+        if user.is_authenticated:
+            # Using the prefetched user_like relationship
+            return user in obj.user_like.all()
         return False
 
     class Meta:
         model = Product
-        exclude = ('user_like',)
+        fields = ['name', 'description', 'price', 'avg_rating', 'image', 'is_liked']
 
 
 class GroupSerializer(serializers.ModelSerializer):

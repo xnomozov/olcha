@@ -54,9 +54,9 @@ class Product(TimestampedModel):
     description = models.TextField()
     price = models.FloatField()
     slug = models.SlugField(max_length=300, unique=True, editable=False, blank=True, null=False)
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='products')
     discount = models.FloatField(default=0)
-    user_like = models.ManyToManyField(User)
+    user_like = models.ManyToManyField(User, related_name='user_like')
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -96,6 +96,8 @@ class Product(TimestampedModel):
     def __str__(self):
         return self.name
 
+    objects = models.Manager()
+
 
 class Image(models.Model):
     image = models.ImageField(upload_to='images/')
@@ -124,6 +126,7 @@ class Comment(TimestampedModel):
             self.user = user
 
         super(Comment, self).save(*args, **kwargs)
+
 
 class AttributeKey(models.Model):
     key = models.CharField(max_length=200, unique=True)
